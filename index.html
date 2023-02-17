@@ -5,9 +5,10 @@
  <title>Progressive Bar Chart</title>
  <script type="text/javascript" src="d3.js"></script>
  </head>
+ <link rel="stylesheet" href="style.css" media="all">
  <body>
-   <p>Which of A and C is higher in height?</p>
-   <p>Which of B and D is lower in height?</p>
+   <p>Which of A and C is <strong>higher</strong> in height?</p>
+   <p>Which of B and D is <strong>lower</strong> in height?</p>
    <p id = "data_loaded"> Data loaded: 0% </p>
  <script type="text/javascript">
 
@@ -56,7 +57,7 @@
       raw_data.pop();
 
       //Width and height
-      var w = 400;
+      var w = 600;
       var h = 250;
       var padding = 30;
 
@@ -72,7 +73,7 @@
       var xScale = d3.scaleBand()
                   .domain(d3.range(amount_functions))
                   .range([padding, w - padding * 2])
-                  .paddingInner(0.1);
+                  .paddingInner(0.5);
 
       var yScale = d3.scaleLinear()
                   .domain([0, maxi])
@@ -167,5 +168,9 @@
    }
 
  </script>
+   <button class = "button"> A > C </button>
+   <button class = "button"> A < C </button>
+   <button class = "button"> B > D </button>
+   <button class = "button"> B < D </button>
  </body>
 </html>
