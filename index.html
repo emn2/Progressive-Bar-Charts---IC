@@ -7,8 +7,6 @@
  </head>
  <link rel="stylesheet" href="style.css" media="all">
  <body>
-   <p>Which of A and C is <strong>higher</strong> in height?</p>
-   <p>Which of B and D is <strong>lower</strong> in height?</p>
    <p id = "data_loaded"> Data loaded: 0% </p>
  <script type="text/javascript">
 
@@ -34,7 +32,28 @@
       return result;
    }
 
+   function onClickQ1(f, s){
+        firstAnswered = true;
+        console.log("user answered letter" + f + " for Q1");
+        document.getElementById(f).onclick = null;
+        document.getElementById(s).onclick = null;
+
+        document.getElementById(f).answered = true;
+        document.getElementById(s).disabled = true;
+   }
+
+   function onClickQ2(f, s){
+        secondAnswered = true;
+        console.log("user answered letter" + f + " for Q2");
+        document.getElementById(f).onclick = null;
+        document.getElementById(s).onclick = null;
+
+        document.getElementById(f).answered = true;
+        document.getElementById(s).disabled = true;
+   }
+
    var dataset;
+   var firstAnswered = false, secondAnswered = false;
 
    d3.csv('Dataset1.csv', function(data) {
       data.forEach(function(d){ 
@@ -137,8 +156,9 @@
 
       async function updates(){
          // Updating charts every second
-         var n = raw_data[0].length;
          var offset = 84;
+         var n = raw_data[0].length;
+
          while(idx < n){
             for(let i = 0; i < data.length; i++){
                data[i] = (idx*(data[i]) + d3.mean(getSubarray(raw_data[i], idx, idx + offset - 1))*offset) / (idx + offset);
@@ -161,16 +181,24 @@
             changeText(percent);
 
             console.log("updated");
+            if(firstAnswered && secondAnswered) break;
          }
       }
+
 
       updates();
    }
 
  </script>
-   <button class = "button"> A > C </button>
-   <button class = "button"> A < C </button>
-   <button class = "button"> B > D </button>
-   <button class = "button"> B < D </button>
+    <div>
+        <p>Q1: Which of A and C is <strong>higher</strong> in height?</p>
+        <button id = "q1A" class = "button" onclick = "onClickQ1('q1A', 'q1B');"> A > C </button>
+        <button id = "q1B" class = "button" onclick = "onClickQ1('q1B', 'q1A');"> A < C </button>
+    </div>
+    <div>
+        <p>Q2: Which of B and D is <strong>lower</strong> in height?</p>
+        <button id = "q2A" class = "button" onclick = "onClickQ2('q2A', 'q2B');"> B > D </button>
+        <button id = "q2B" class = "button" onclick = "onClickQ2('q2B', 'q2A');"> B < D </button>
+    </div>
  </body>
 </html>
