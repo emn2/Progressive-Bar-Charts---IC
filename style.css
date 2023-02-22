@@ -1,7 +1,3 @@
-.bar {
-    color: #471e98;
-}
-
 .button {
     border: none;
     color: white;
@@ -30,6 +26,12 @@
     cursor: not-allowed;
 }
 
-.button:answered {
+.button:correct {
     opacity: 1;
+    background: green;
+}
+
+.button:wrong {
+    opacity: 1;
+    background: red;
 }

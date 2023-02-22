@@ -4,201 +4,244 @@
  <meta charset="utf-8">
  <title>Progressive Bar Chart</title>
  <script type="text/javascript" src="d3.js"></script>
- </head>
- <link rel="stylesheet" href="style.css" media="all">
- <body>
+</head>
+<link rel="stylesheet" href="style.css" media="all">
+<body>
    <p id = "data_loaded"> Data loaded: 0% </p>
- <script type="text/javascript">
+   <div>
+      <script type="text/javascript">
+         var means = [];
 
-   function getSubarray(array, fromIndex, toIndex) {
-      return array.slice(fromIndex, toIndex+1);
-   }
-
-   function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-   }
-
-   function changeText(percentage){
-      var element = document.getElementById("data_loaded");
-      element.innerHTML = "Data loaded: " + percentage.toFixed(2) + "%";
-   }
-
-   function getMapValues(map) {
-      const result = [];
-      for(let i in map){
-         result.push(map[i]);
-      }
-      result.pop();
-      return result;
-   }
-
-   function onClickQ1(f, s){
-        firstAnswered = true;
-        console.log("user answered letter" + f + " for Q1");
-        document.getElementById(f).onclick = null;
-        document.getElementById(s).onclick = null;
-
-        document.getElementById(f).answered = true;
-        document.getElementById(s).disabled = true;
-   }
-
-   function onClickQ2(f, s){
-        secondAnswered = true;
-        console.log("user answered letter" + f + " for Q2");
-        document.getElementById(f).onclick = null;
-        document.getElementById(s).onclick = null;
-
-        document.getElementById(f).answered = true;
-        document.getElementById(s).disabled = true;
-   }
-
-   var dataset;
-   var firstAnswered = false, secondAnswered = false;
-
-   d3.csv('Dataset1.csv', function(data) {
-      data.forEach(function(d){ 
-         for(let i in d){
-            d[i] = Number(d[i]);
+         function getSubarray(array, fromIndex, toIndex) {
+            return array.slice(fromIndex, toIndex+1);
          }
-      })
-      dataset = data;
 
-      main();
-   });
+         function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+         }
 
-   function main(){
-      var raw_data = [];
-      for(let i in dataset){
-         var a = getMapValues(dataset[i]);
-         raw_data.push(a);
-      }
+         function changeText(percentage){
+            var element = document.getElementById("data_loaded");
+            element.innerHTML = "Data loaded: " + percentage.toFixed(2) + "%";
+         }
 
-      raw_data.pop();
-
-      //Width and height
-      var w = 600;
-      var h = 250;
-      var padding = 30;
-
-      //Util variables
-      var idx = 88;
-      var delayTime = 1000;
-      var amount_functions = 4;
-
-      var maxi = d3.max(raw_data, function (d) {
-         return d3.max(d);
-      });
-
-      var xScale = d3.scaleBand()
-                  .domain(d3.range(amount_functions))
-                  .range([padding, w - padding * 2])
-                  .paddingInner(0.5);
-
-      var yScale = d3.scaleLinear()
-                  .domain([0, maxi])
-                  .range([padding, h - padding]);
-
-      var xLabels =  ["A", "B", "C", "D"];
-               
-      var xAxis = d3.axisBottom()
-                  .scale(xScale)
-                  .ticks(4)
-                  .tickFormat(function(d, i) {return xLabels[i]});
-
-      var yAxis = d3.axisLeft()
-                  .scale(yScale)
-                  .ticks(5)
-                  .tickFormat(function(d) {return 50 - d});
-
-
-      //Create SVG element
-      var svg = d3.select("body")
-               .append("svg")
-               .attr("width", w)
-               .attr("height", h);
-
-      var color = ["rgb(153, 51, 153)", "rgb(255, 215, 0)", "rgb(0, 163, 108)", "rgb(0, 0, 255)"];
-
-      var data = []
-      for(let i = 0; i < amount_functions; i++)
-         data.push(d3.mean(getSubarray(raw_data[i], 0, idx - 1)));
-
-      //Create bars initially
-      svg.selectAll("rect")
-         .data(data)
-         .enter()
-         .append("rect")
-         .attr("x", function(d, i) {
-            return xScale(i);
-         })
-         .attr("y", function(d) {
-            return h - yScale(d) - padding;
-         })
-         .attr("width", xScale.bandwidth())
-         .attr("height", function(d) {
-            return yScale(d);
-         })
-         .attr("fill", function(d, i) {
-            return color[i];
-         });
-
-      //Create X axis
-      svg.append("g")
-         .attr("class", "axis")
-         .attr("transform", "translate(0," + (h - padding) + ")")
-         .call(xAxis);
-      
-      //Create Y axis
-      svg.append("g")
-         .attr("class", "axis")
-         .attr("transform", "translate(" + padding + ",0)")
-         .call(yAxis);
-
-      async function updates(){
-         // Updating charts every second
-         var offset = 84;
-         var n = raw_data[0].length;
-
-         while(idx < n){
-            for(let i = 0; i < data.length; i++){
-               data[i] = (idx*(data[i]) + d3.mean(getSubarray(raw_data[i], idx, idx + offset - 1))*offset) / (idx + offset);
+         function getMapValues(map) {
+            const result = [];
+            for(let i in map){
+               result.push(map[i]);
             }
-            // console.log(data);
-            idx = idx + offset;
-            
-            await sleep(delayTime);
+            result.pop();
+            return result;
+         }
 
+         function onClickQ1(f, s){
+            firstAnswered = true;
+            console.log("user answered letter " + f + " for Q1");
+            document.getElementById(f).onclick = null;
+            document.getElementById(s).onclick = null;
+
+            if((f == 'q1A' && means[0] > means[2]) || (f == 'q1B' && means[0] < means[2])){ //check if the user answered it correctly
+               document.getElementById(f).correct = true;      
+            }
+            else document.getElementById(f).wrong = true;
+
+            document.getElementById(s).disabled = true;
+         }
+
+         function onClickQ2(f, s){
+            secondAnswered = true;
+            console.log("user answered letter " + f + " for Q2");
+            document.getElementById(f).onclick = null;
+            document.getElementById(s).onclick = null;
+
+            if((f == 'q2A' && means[1] > means[3]) || (f == 'q2B' && means[1] < means[3])){ //check if the user answered it correctly
+               document.getElementById(f).correct = true;      
+            }
+            else document.getElementById(f).wrong = true;
+
+            document.getElementById(s).disabled = true;
+         }
+         
+         var dataset;
+         var firstAnswered = false, secondAnswered = false;
+      
+         d3.csv('Dataset1.csv', function(data) {
+            data.forEach(function(d){ 
+               for(let i in d){
+                  d[i] = Number(d[i]);
+               }
+            })
+            dataset = data;
+      
+            main();
+         });
+      
+         function main(){
+            var raw_data = [];
+            for(let i in dataset){
+               var a = getMapValues(dataset[i]);
+               raw_data.push(a);
+            }
+      
+            raw_data.pop();
+
+            //Width and height
+            var w = 600;
+            var h = 250;
+            var error_w = 10;
+
+            var padding = 30;
+      
+            //Util variables
+            var idx = 88;
+            var delayTime = 1000;
+            var amount_functions = 4;
+
+            var data = [];
+            var errors = [];
+            for(let i = 0; i < amount_functions; i++){
+               means.push(d3.mean(raw_data[i]));
+               data.push(d3.mean(getSubarray(raw_data[i], 0, idx - 1)));
+               errors.push(Math.abs(means[i] - data[i]));
+            }
+      
+            var maxi = d3.max(raw_data, function (d) {
+               return d3.max(d);
+            });
+
+            var maxi_error = d3.max(errors);
+      
+            var xScale = d3.scaleBand()
+                        .domain(d3.range(amount_functions))
+                        .range([padding, w - padding * 2])
+                        .paddingInner(0.5);
+      
+            var yScale = d3.scaleLinear()
+                        .domain([0, maxi])
+                        .range([padding, h - padding]);
+
+            var eScale = d3.scaleLinear()
+                        .domain([0, maxi])
+                        .range([padding, h - padding])
+      
+            var xLabels =  ["A", "B", "C", "D"];
+                     
+            var xAxis = d3.axisBottom()
+                        .scale(xScale)
+                        .ticks(4)
+                        .tickFormat(function(d, i) {return xLabels[i]});
+      
+            var yAxis = d3.axisLeft()
+                        .scale(yScale)
+                        .ticks(5)
+                        .tickFormat(function(d) {return 50 - d});
+      
+      
+            //Create SVG element
+            var svg = d3.select("body")
+                     .append("svg")
+                     .attr("width", w)
+                     .attr("height", h);
+      
+            var color = ["rgb(153, 51, 153)", "rgb(255, 215, 0)", "rgb(0, 163, 108)", "rgb(0, 0, 255)"];
+      
+            //Create bars initially
             svg.selectAll("rect")
                .data(data)
+               .enter()
+               .append("rect")
+               .attr("x", function(d, i) {
+                  return xScale(i);
+               })
                .attr("y", function(d) {
                   return h - yScale(d) - padding;
                })
+               .attr("width", xScale.bandwidth())
                .attr("height", function(d) {
                   return yScale(d);
                })
+               .attr("fill", function(d, i) {
+                  return color[i];
+               });
 
-            var percent = 100 * (idx / n);
-            changeText(percent);
-
-            console.log("updated");
-            if(firstAnswered && secondAnswered) break;
+            //Error bars
+            svg.selectAll('line')
+              .data(errors)
+              .enter()
+              .append("line")
+              .attr("x1", function(d, i) {
+                  return xScale(i);
+               })
+               .attr("x2", function(d, i) {
+                  return xScale(i) + 5;
+               })
+               .attr("y1", function(d, i) {
+                  return h - yScale(data[i]) - padding + eScale(d);
+               })
+               .attr("y2", function(d, i){
+                  return h - yScale(data[i]) - padding - eScale(d);
+               })
+               .attr("fill", "red");
+            
+          //  debugger
+            //Create X axis
+            svg.append("g")
+               .attr("class", "axis")
+               .attr("transform", "translate(0," + (h - padding) + ")")
+               .call(xAxis);
+            
+            //Create Y axis
+            svg.append("g")
+               .attr("class", "axis")
+               .attr("transform", "translate(" + padding + ",0)")
+               .call(yAxis);
+      
+            async function updates(){
+               // Updating charts every second
+               var offset = 84;
+               var n = raw_data[0].length;
+      
+               while(idx < n){
+                  for(let i = 0; i < data.length; i++){
+                     data[i] = (idx*(data[i]) + d3.mean(getSubarray(raw_data[i], idx, idx + offset - 1))*offset) / (idx + offset);
+                  }
+                  // console.log(data);
+                  idx = idx + offset;
+                  
+                  await sleep(delayTime);
+      
+                  svg.selectAll("rect")
+                     .data(data)
+                     .attr("y", function(d) {
+                        return h - yScale(d) - padding;
+                     })
+                     .attr("height", function(d) {
+                        return yScale(d);
+                     })
+      
+                  var percent = 100 * (idx / n);
+                  changeText(percent);
+      
+                  console.log("updated");
+                  if(firstAnswered && secondAnswered) break;
+               }
+            }
+      
+      
+            updates();
          }
-      }
-
-
-      updates();
-   }
-
- </script>
-    <div>
-        <p>Q1: Which of A and C is <strong>higher</strong> in height?</p>
-        <button id = "q1A" class = "button" onclick = "onClickQ1('q1A', 'q1B');"> A > C </button>
-        <button id = "q1B" class = "button" onclick = "onClickQ1('q1B', 'q1A');"> A < C </button>
-    </div>
-    <div>
-        <p>Q2: Which of B and D is <strong>lower</strong> in height?</p>
-        <button id = "q2A" class = "button" onclick = "onClickQ2('q2A', 'q2B');"> B > D </button>
-        <button id = "q2B" class = "button" onclick = "onClickQ2('q2B', 'q2A');"> B < D </button>
-    </div>
+      
+       </script>
+   </div>
+   <div>
+      <p>Q1: Which of A and C is <strong>higher</strong> in height?</p>
+      <button id = "q1A" class = "button" onclick = "onClickQ1('q1A', 'q1B');"> A > C </button>
+      <button id = "q1B" class = "button" onclick = "onClickQ1('q1B', 'q1A');"> A < C </button>
+   </div>
+   <div>
+      <p>Q2: Which of B and D is <strong>lower</strong> in height?</p>
+      <button id = "q2A" class = "button" onclick = "onClickQ2('q2A', 'q2B');"> B > D </button>
+      <button id = "q2B" class = "button" onclick = "onClickQ2('q2B', 'q2A');"> B < D </button>
+   </div>
  </body>
 </html>
