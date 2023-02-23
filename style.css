@@ -1,4 +1,25 @@
-.button {
+body{
+    margin:0;
+    background: midnightblue;
+    background-repeat:no-repeat;
+    font-family: sans-serif;
+}
+
+*{
+    box-sizing: border-box;
+}
+
+.graph-container{
+    max-width: 800px;
+    min-height:600px;
+    background-color: white;
+    margin:40px auto;
+
+    border-radius:15px;
+    padding:30px;
+}
+
+.button .myButton {
     border: none;
     color: white;
     background-color: #07a7f1;
@@ -12,26 +33,26 @@
     transition-duration: 0.1s;
 }
 
-.button:hover {
+.button .myButton .hover {
     background-color: solid #10b3ff;
 }
 
-.button:active {
+.button .myButton .active {
     background-color: solid #10b3ff;
     border-radius: 10px;
 }
 
-.button:disabled {
+.button .myButton .disabled {
     opacity: 0.2;
     cursor: not-allowed;
 }
 
-.button:correct {
-    opacity: 1;
-    background: green;
-}
-
-.button:wrong {
+.button .myButton .wrong {
     opacity: 1;
     background: red;
+}
+
+.button .myButton .correct {
+    opacity: 1;
+    background: green;
 }
