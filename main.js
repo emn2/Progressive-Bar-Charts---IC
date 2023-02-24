@@ -1,9 +1,3 @@
-var means = [];
-
-function getSubarray(array, fromIndex, toIndex) {
-   return array.slice(fromIndex, toIndex+1);
-}
-
 function sleep(ms) {
    return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -13,34 +7,19 @@ function changeText(percentage){
    element.innerHTML = "Data loaded: " + percentage.toFixed(2) + "%";
 }
 
-function getConfidenceInterval(numElements,m,s,confidence){
-   //t_crit = st.norm.ppf(confidence);
-   //return [m-s*t_crit/Math.sqrt(numElements), m+s*t_crit/Math.sqrt(numElements)];
-   return [m-1, m+1];
-}
-
-function getMapValues(map) {
-   const result = [];
-   for(let i in map){
-      result.push(map[i]);
-   }
-   result.pop();
-   return result;
-}
-//options[i].classList.add("disabled");
 function onClickQ1(f, s){
    firstAnswered = true;
    console.log("user answered letter " + f + " for Q1");
    document.getElementById(f).onclick = null;
    document.getElementById(s).onclick = null;
 
-   if((f == 'q1A' && means[0] > means[2]) || (f == 'q1B' && means[0] < means[2])){ //check if the user answered it correctly
-      document.getElementById(f).classList.add("correct");
-      //document.getElementById(f).correct = true;      
-   }
-   else document.getElementById(f).classList.add("wrong"); 
+   // if((f == 'q1A' && means[0] > means[2]) || (f == 'q1B' && means[0] < means[2])){ //check if the user answered it correctly
+   //    document.getElementById(f).classList.add("correct");
+   //    //document.getElementById(f).correct = true;      
+   // }
+   // else document.getElementById(f).classList.add("wrong"); 
 
-   document.getElementById(s).classList.add("disabled"); 
+   // document.getElementById(s).classList.add("disabled"); 
 }
 
 function onClickQ2(f, s){
@@ -49,64 +28,47 @@ function onClickQ2(f, s){
    document.getElementById(f).onclick = null;
    document.getElementById(s).onclick = null;
 
-   if((f == 'q2A' && means[1] > means[3]) || (f == 'q2B' && means[1] < means[3])){ //check if the user answered it correctly
-      document.getElementById(f).classList.add("correct");     
-   }
-   else document.getElementById(f).classList.add("wrong"); 
+   // if((f == 'q2A' && means[1] > means[3]) || (f == 'q2B' && means[1] < means[3])){ //check if the user answered it correctly
+   //    document.getElementById(f).classList.add("correct");     
+   // }
+   // else document.getElementById(f).classList.add("wrong"); 
 
-   document.getElementById(s).classList.add("disabled"); 
+   // document.getElementById(s).classList.add("disabled"); 
 }
 
 var dataset;
 var firstAnswered = false, secondAnswered = false;
 
-d3.csv('Dataset1.csv', function(data) {
-   data.forEach(function(d){ 
-      for(let i in d){
-         d[i] = Number(d[i]);
-      }
-   })
+d3.json('Dataset_normal.json', function(data) {
    dataset = data;
-
    main();
 });
 
 function main(){
-   var raw_data = [];
-   for(let i in dataset){
-      var a = getMapValues(dataset[i]);
-      raw_data.push(a);
-   }
-
-   raw_data.pop();
-
    //Width and height
-   var w = 600;
-   var h = 250;
-   var error_w = 10;
-
+   var w = 800;
+   var h = 450;
    var padding = 30;
 
    //Util variables
-   var idx = 88;
+   var t = 0;
    var delayTime = 1000;
    var amount_functions = 4;
 
-   var data = [];
-   var sumSquares = [];
+   var means = [];
    var errors = [];
+
    for(let i = 0; i < amount_functions; i++){
-      means.push(d3.mean(raw_data[i]));
-      sumSquares.push(d3.sum(getSubarray(raw_data[i], 0, idx - 1).map(t=>t*t)));
-      data.push(d3.mean(getSubarray(raw_data[i], 0, idx - 1)));
-      errors.push(Math.abs(means[i] - data[i]));
+      means.push(dataset['means'][i][t])
+      errors.push(dataset['confidence_intervals'][i][t])
    }
 
-   var maxi = d3.max(raw_data, function (d) {
-      return d3.max(d);
-   });
-
-   var maxi_error = d3.max(errors);
+   var maxi = 0;
+   for(let i in dataset['means']){
+      maxi = Math.max(maxi, d3.max(dataset['means'][i]));
+      maxi = Math.max(maxi, d3.max(dataset['confidence_intervals'][i][0]));
+      maxi = Math.max(maxi, d3.max(dataset['confidence_intervals'][i][1]));
+   }
 
    var xScale = d3.scaleBand()
                .domain(d3.range(amount_functions))
@@ -115,11 +77,8 @@ function main(){
 
    var yScale = d3.scaleLinear()
                .domain([0, maxi])
-               .range([padding, h - padding]);
+               .range([h - padding, padding]);
 
-   var eScale = d3.scaleLinear()
-               .domain([0, maxi])
-               .range([padding, h - padding])
 
    var xLabels =  ["A", "B", "C", "D"];
             
@@ -130,9 +89,7 @@ function main(){
 
    var yAxis = d3.axisLeft()
                .scale(yScale)
-               .ticks(5)
-               .tickFormat(function(d) {return 50 - d});
-
+               .ticks(5);
 
    //Create SVG element
    var svg = d3.select(document.getElementById("bar-graph"))
@@ -144,25 +101,25 @@ function main(){
 
    //Create bars initially
    svg.selectAll("rect")
-      .data(data)
+      .data(means)
       .enter()
       .append("rect")
       .attr("x", function(d, i) {
          return xScale(i);
       })
       .attr("y", function(d) {
-         return h - yScale(d) - padding;
+         return yScale(d);
       })
       .attr("width", xScale.bandwidth())
       .attr("height", function(d) {
-         return yScale(d);
+         return h - padding - yScale(d);
       })
       .attr("fill", function(d, i) {
          return color[i];
       });
 
    //Error bars
-   var aux = svg.selectAll('line')
+   svg.selectAll('line')
       .data(errors)
       .enter()
       .append("line")
@@ -172,16 +129,16 @@ function main(){
       .attr("x2", function(d, i) {
          return xScale(i) + xScale.bandwidth()/2;
       })
-      .attr("y1", function(d, i) {
-         return h - yScale(data[i]) - padding + eScale(d);
+      .attr("y1", function(d) {
+         return yScale(d[0]);
       })
-      .attr("y2", function(d, i){
-         return h - yScale(data[i]) - padding - eScale(d);
+      .attr("y2", function(d){
+         return yScale(d[1]);
       })
       .attr("stroke", "red")
       .attr("class","errorBar");
    
-   //  debugger
+   
    //Create X axis
    svg.append("g")
       .attr("class", "axis")
@@ -194,48 +151,46 @@ function main(){
       .attr("transform", "translate(" + padding + ",0)")
       .call(yAxis);
 
+   debugger
+
    async function updates(){
       // Updating charts every second
-      var offset = 84;
-      var n = raw_data[0].length;
-      while(idx < n){
-         var variances = [];
-         var intervals = [];
+      var n = dataset['means'][0].length;
+      while(t < n){
+         t++;
    
-         for(let i = 0; i < data.length; i++){
-            data[i] = (idx*(data[i]) + d3.mean(getSubarray(raw_data[i], idx, idx + offset - 1))*offset) / (idx + offset);
-            sumSquares[i] += d3.sum(getSubarray(raw_data[i], idx, idx + offset - 1).map(t=>t*t));
-            var nSoFar = idx + offset;
-            variances.push(nSoFar * data[i] * data[i] + sumSquares[i] - 2*data[i]*(data[i]*nSoFar))/(nSoFar-1);
-            intervals.push(getConfidenceInterval(nSoFar, data[i],Math.sqrt(variances[i]),0.95));
+         for(let i = 0; i < amount_functions; i++){
+            means[i] = dataset['means'][i][t];
+            errors[i] = dataset['confidence_intervals'][i][t];
          }
-         // console.log(data);
-         idx = idx + offset;
-         
+
          await sleep(delayTime);
+
+         console.log("means = " + means);
+         console.log("errors = " + errors);
 
          //update bars
          svg.selectAll("rect")
-            .data(data)
+            .data(means)
             .attr("y", function(d) {
-               return h - yScale(d) - padding;
+               return yScale(d);
             })
             .attr("height", function(d) {
-               return yScale(d);
+               return h - padding - yScale(d);
             })
 
          //update error
          d3.selectAll('.errorBar')
-         .data(intervals)
-         .attr("y1", function(d, i) {
-            return h-yScale(d[0])-padding;
-         })
-         .attr("y2", function(d, i){
-            return h-yScale(d[1])-padding;
-         });
+           .data(errors)
+           .attr("y1", function(d) {
+               return yScale(d[0]);
+           })
+           .attr("y2", function(d){
+               return yScale(d[1]);
+           });
 
-         //
-         var percent = 100 * (idx / n);
+
+         var percent = 100 * (t / n);
          changeText(percent);
 
          console.log("updated");
