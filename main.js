@@ -13,6 +13,12 @@ function changeText(percentage){
    element.innerHTML = "Data loaded: " + percentage.toFixed(2) + "%";
 }
 
+function getConfidenceInterval(numElements,m,s,confidence){
+   //t_crit = st.norm.ppf(confidence);
+   //return [m-s*t_crit/Math.sqrt(numElements), m+s*t_crit/Math.sqrt(numElements)];
+   return [m-1, m+1];
+}
+
 function getMapValues(map) {
    const result = [];
    for(let i in map){
@@ -87,9 +93,11 @@ function main(){
    var amount_functions = 4;
 
    var data = [];
+   var sumSquares = [];
    var errors = [];
    for(let i = 0; i < amount_functions; i++){
       means.push(d3.mean(raw_data[i]));
+      sumSquares.push(d3.sum(getSubarray(raw_data[i], 0, idx - 1).map(t=>t*t)));
       data.push(d3.mean(getSubarray(raw_data[i], 0, idx - 1)));
       errors.push(Math.abs(means[i] - data[i]));
    }
@@ -154,15 +162,15 @@ function main(){
       });
 
    //Error bars
-   svg.selectAll('line')
+   var aux = svg.selectAll('line')
       .data(errors)
       .enter()
       .append("line")
       .attr("x1", function(d, i) {
-         return xScale(i);
+         return xScale(i) + xScale.bandwidth()/2;
       })
       .attr("x2", function(d, i) {
-         return xScale(i) + 5;
+         return xScale(i) + xScale.bandwidth()/2;
       })
       .attr("y1", function(d, i) {
          return h - yScale(data[i]) - padding + eScale(d);
@@ -170,7 +178,8 @@ function main(){
       .attr("y2", function(d, i){
          return h - yScale(data[i]) - padding - eScale(d);
       })
-      .attr("fill", "red");
+      .attr("stroke", "red")
+      .attr("class","errorBar");
    
    //  debugger
    //Create X axis
@@ -189,16 +198,23 @@ function main(){
       // Updating charts every second
       var offset = 84;
       var n = raw_data[0].length;
-
       while(idx < n){
+         var variances = [];
+         var intervals = [];
+   
          for(let i = 0; i < data.length; i++){
             data[i] = (idx*(data[i]) + d3.mean(getSubarray(raw_data[i], idx, idx + offset - 1))*offset) / (idx + offset);
+            sumSquares[i] += d3.sum(getSubarray(raw_data[i], idx, idx + offset - 1).map(t=>t*t));
+            var nSoFar = idx + offset;
+            variances.push(nSoFar * data[i] * data[i] + sumSquares[i] - 2*data[i]*(data[i]*nSoFar))/(nSoFar-1);
+            intervals.push(getConfidenceInterval(nSoFar, data[i],Math.sqrt(variances[i]),0.95));
          }
          // console.log(data);
          idx = idx + offset;
          
          await sleep(delayTime);
 
+         //update bars
          svg.selectAll("rect")
             .data(data)
             .attr("y", function(d) {
@@ -208,6 +224,17 @@ function main(){
                return yScale(d);
             })
 
+         //update error
+         d3.selectAll('.errorBar')
+         .data(intervals)
+         .attr("y1", function(d, i) {
+            return h-yScale(d[0])-padding;
+         })
+         .attr("y2", function(d, i){
+            return h-yScale(d[1])-padding;
+         });
+
+         //
          var percent = 100 * (idx / n);
          changeText(percent);
 
