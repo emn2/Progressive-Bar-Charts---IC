@@ -50,9 +50,11 @@ body{
 .button .myButton .wrong {
     opacity: 1;
     background: red;
+    cursor: not-allowed;
 }
 
 .button .myButton .correct {
     opacity: 1;
     background: green;
+    cursor: not-allowed;
 }
