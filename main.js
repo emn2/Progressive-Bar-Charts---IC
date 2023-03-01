@@ -2,7 +2,7 @@ function sleep(ms) {
    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function changeText(percentage){
+function changePercentage(percentage){
    var element = document.getElementById("data_loaded");
    element.innerHTML = "Data loaded: " + percentage.toFixed(2) + "%";
 }
@@ -118,6 +118,8 @@ function main(){
          return color[i];
       });
 
+   debugger
+
    //Error bars
    svg.selectAll('line')
       .data(errors)
@@ -191,7 +193,7 @@ function main(){
 
 
          var percent = 100 * (t / n);
-         changeText(percent);
+         changePercentage(percent);
 
          console.log("updated");
          if(firstAnswered && secondAnswered) break;
