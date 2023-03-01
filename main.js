@@ -92,7 +92,7 @@ function main(){
                .ticks(5);
 
    //Create SVG element
-   var svg = d3.select(document.getElementById("bar-graph"))
+   var svg = d3.select("#bar-graph")
             .append("svg")
             .attr("width", w)
             .attr("height", h);
@@ -117,8 +117,6 @@ function main(){
       .attr("fill", function(d, i) {
          return color[i];
       });
-
-   debugger
 
    //Error bars
    svg.selectAll('line')
@@ -152,8 +150,6 @@ function main(){
       .attr("class", "axis")
       .attr("transform", "translate(" + padding + ",0)")
       .call(yAxis);
-
-   debugger
 
    async function updates(){
       // Updating charts every second

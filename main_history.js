@@ -94,11 +94,21 @@ function sleep(ms) {
              .append("svg")
              .attr("width", w)
              .attr("height", h)
-             .attr("z-index", -1)
              .attr("class", "main-svg");
 
 
     var color = ["rgb(153, 51, 153)", "rgb(255, 215, 0)", "rgb(0, 163, 108)", "rgb(0, 0, 255)"];
+
+    // my_svg.selectAll('.history_bar')
+    // .data(d3.range(amount_functions))
+    // .enter()
+    // .append('g')
+    // .attr('class','history_bar')
+    // .attr('transform',id=>'translate(' + xScale(id) + ',' + h + ')')
+    //             .append('circle')
+    //         .attr('x',0)
+    //         .attr('y',0)
+    //         .attr('r',30);
 
     for(let id = 0; id < amount_functions; id++){  
         my_svg.append("svg")
@@ -106,56 +116,60 @@ function sleep(ms) {
                 return xScale(id);
             })
             .attr("y", function(d) {
-                return h;
+                return 20;
             })
-            .attr("width", xScale.bandwidth())
-            .attr("height", h)
-            .attr("class", "child-svg-" + id);
+            .attr("width", 200)
+            .attr("height", 200)
+            .attr("class", "child-svg-" + id)
+            .append('circle')
+            .attr('x',0)
+            .attr('y',0)
+            .attr('r',30);
     }
 
-    for(let id = 0; id < amount_functions; id++){
-        var child_name = 'child-svg-' + id;
-        var child = d3.select(child_name);
+    // for(let id = 0; id < amount_functions; id++){
+    //     var child_name = 'child-svg-' + id;
+    //     var child = d3.select(child_name);
 
-        child.selectAll("rect")
-            .data(means[id])
-            .enter()
-            .attr("x", function(d, i) {
-                console.log(insideScale(i));
-                return xScale(id) + insideScale(i);
-            })
-            .attr("y", function(d) {
-                return yScale(d);
-            })
-            .attr("width", xScale.bandwidth() / amount_history)
-            .attr("height", function(d) {
-                return h - padding - yScale(d);
-            })
-            .attr("fill", color[id])
-            .attr("class", "rect-svg-" + id);
+    //     child.selectAll("rect")
+    //         .data(means[id])
+    //         .enter()
+    //         .attr("x", function(d, i) {
+    //             console.log(insideScale(i));
+    //             return xScale(id) + insideScale(i);
+    //         })
+    //         .attr("y", function(d) {
+    //             return yScale(d);
+    //         })
+    //         .attr("width", xScale.bandwidth() / amount_history)
+    //         .attr("height", function(d) {
+    //             return h - padding - yScale(d);
+    //         })
+    //         .attr("fill", color[id])
+    //         .attr("class", "rect-svg-" + id);
         
-        //Error bars
-        // child.selectAll('line')
-        //     .data(errors[id])
-        //     .enter()
-        //     .append("line")
-        //     .attr("x1", function(d, i) {
-        //         return insideScale(xScale(i)) + insideScale.bandwidth()/2;
-        //     })
-        //     .attr("x2", function(d, i) {
-        //         return insideScale(xScale(i)) + insideScale.bandwidth()/2;
-        //     })
-        //     .attr("y1", function(d) {
-        //         return yScale(d[0]);
-        //     })
-        //     .attr("y2", function(d){
-        //         return yScale(d[1]);
-        //     })
-        //     .attr("stroke", "red")
-        //     .attr("class","errorBar");
-    }   
+    //     //Error bars
+    //     // child.selectAll('line')
+    //     //     .data(errors[id])
+    //     //     .enter()
+    //     //     .append("line")
+    //     //     .attr("x1", function(d, i) {
+    //     //         return insideScale(xScale(i)) + insideScale.bandwidth()/2;
+    //     //     })
+    //     //     .attr("x2", function(d, i) {
+    //     //         return insideScale(xScale(i)) + insideScale.bandwidth()/2;
+    //     //     })
+    //     //     .attr("y1", function(d) {
+    //     //         return yScale(d[0]);
+    //     //     })
+    //     //     .attr("y2", function(d){
+    //     //         return yScale(d[1]);
+    //     //     })
+    //     //     .attr("stroke", "red")
+    //     //     .attr("class","errorBar");
+    // }   
 
-    debugger
+    
 
     //Create X axis
     my_svg.append("g")
@@ -169,63 +183,63 @@ function sleep(ms) {
           .attr("transform", "translate(" + padding + ",0)")
           .call(yAxis);
 
-    debugger
+    
  
     async function updates(){
-       // Updating charts every second
-       var n = dataset['means'][0].length;
-       while(t < n){
-          t++;
+    //    // Updating charts every second
+    //    var n = dataset['means'][0].length;
+    //    while(t < n){
+    //       t++;
 
-          for(let i = 0; i < amount_functions; i++){
-            for(let j = 0; j < amount_history - 1; j++){
-                means[i][j] = means[i][j + 1];
-                errors[i][j] = errors[i][j + 1];
-            }
-          }
+    //       for(let i = 0; i < amount_functions; i++){
+    //         for(let j = 0; j < amount_history - 1; j++){
+    //             means[i][j] = means[i][j + 1];
+    //             errors[i][j] = errors[i][j + 1];
+    //         }
+    //       }
     
-          for(let i = 0; i < amount_functions; i++){
-             means[i][amount_history - 1] = dataset['means'][i][t];
-             errors[i][amount_history - 1] = dataset['confidence_intervals'][i][t];
-          }
+    //       for(let i = 0; i < amount_functions; i++){
+    //          means[i][amount_history - 1] = dataset['means'][i][t];
+    //          errors[i][amount_history - 1] = dataset['confidence_intervals'][i][t];
+    //       }
  
-          await sleep(delayTime);
+    //       await sleep(delayTime);
  
-          console.log("means = " + means);
-          console.log("errors = " + errors);
+    //       console.log("means = " + means);
+    //       console.log("errors = " + errors);
  
-          //update bars
-          for(let i = 0; i < amount_functions; i++){
-            var child_name = 'child-svg-' + i;
-            var child = d3.select(child_name);
+    //       //update bars
+    //       for(let i = 0; i < amount_functions; i++){
+    //         var child_name = 'child-svg-' + i;
+    //         var child = d3.select(child_name);
             
-            //Update bars
-            child.selectAll("rect")
-                .data(means[i])
-                .attr("y", function(d) {
-                    return yScale(d);
-                })
-                .attr("height", function(d) {
-                    return h - padding - yScale(d);
-                });
+    //         //Update bars
+    //         child.selectAll("rect")
+    //             .data(means[i])
+    //             .attr("y", function(d) {
+    //                 return yScale(d);
+    //             })
+    //             .attr("height", function(d) {
+    //                 return h - padding - yScale(d);
+    //             });
 
-            //Update errors
-            child.selectAll('.errorBar')
-                .data(errors[i])
-                .attr("y1", function(d) {
-                    return yScale(d[0]);
-                })
-                .attr("y2", function(d){
-                    return yScale(d[1]);
-                });
-          }
+    //         //Update errors
+    //         child.selectAll('.errorBar')
+    //             .data(errors[i])
+    //             .attr("y1", function(d) {
+    //                 return yScale(d[0]);
+    //             })
+    //             .attr("y2", function(d){
+    //                 return yScale(d[1]);
+    //             });
+    //       }
  
-          var percent = 100 * (t / n);
-          changePercentage(percent);
+    //       var percent = 100 * (t / n);
+    //       changePercentage(percent);
  
-          console.log("updated");
-          if(firstAnswered && secondAnswered) break;
-       }
+    //       console.log("updated");
+    //       if(firstAnswered && secondAnswered) break;
+    //    }
     }
  
  
