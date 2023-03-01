@@ -19,10 +19,6 @@ body{
     padding:30px;
 }
 
-.bar-container{
-    opacity: 1;
-}
-
 .button .myButton {
     border: none;
     color: white;

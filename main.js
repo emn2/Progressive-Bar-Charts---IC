@@ -3,8 +3,7 @@ function sleep(ms) {
 }
 
 function changePercentage(percentage){
-   var element = document.getElementById("data_loaded");
-   element.innerHTML = "Data loaded: " + percentage.toFixed(2) + "%";
+   d3.select('#data_loaded').text("Data loaded: " + percentage.toFixed(2) + "%")
 }
 
 function onClickQ1(f, s){
