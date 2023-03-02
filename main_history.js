@@ -96,41 +96,26 @@ function sleep(ms) {
 
 
     var color = ["rgb(153, 51, 153)", "rgb(255, 215, 0)", "rgb(0, 163, 108)", "rgb(0, 0, 255)"];
-
-    // my_svg.selectAll('.history_bar')
-    // .data(d3.range(amount_functions))
-    // .enter()
-    // .append('g')
-    // .attr('class','history_bar')
-    // .attr('transform',id=>'translate(' + xScale(id) + ',' + h + ')')
-    //             .append('circle')
-    //         .attr('x',0)
-    //         .attr('y',0)
-    //         .attr('r',30);
+    var my_svg_childs = [];
 
     my_svg.selectAll('svg')
     .data(d3.range(amount_functions))
     .enter()
     .append('svg')
-    .attr('x', function(d, i) {return xScale(id)})
+    .attr('x', function(d, i) {return xScale(i)})
     .attr('y', 0)
     .attr('width', xScale.bandwidth())
     .attr('height', h)
-    .attr('id', function(d, i) { return String('child-svg-' + i)});
+    .attr('id', function(d, i) { 
+        my_svg_childs.push(String('child-svg-' + i));
+        return String('child-svg-' + i);
+    });
 
-    debugger
+    // debugger
 
     for(let id = 0; id < amount_functions; id++){  
-        var child_name = String('child-svg-' + id);
-        my_svg.append("svg")
-              .attr("x", xScale(id))
-              .attr("y", 0)
-              .attr("width", xScale.bandwidth())
-              .attr("height", h)
-              .attr("id", child_name);
-            
-        child_name = '#' + child_name;
-        
+        var child_name = String('#child-svg-' + id);
+
         //Rectangle bars
         my_svg.selectAll(child_name) 
             .data(means[id])
@@ -188,6 +173,7 @@ function sleep(ms) {
        while(t < n){
           t++;
 
+          // Erasing first bar and adding a new bar at the end
           for(let i = 0; i < amount_functions; i++){
             means[i].shift();
             means[i].push(dataset['means'][i][t]);
@@ -198,9 +184,6 @@ function sleep(ms) {
  
           await sleep(delayTime);
  
-        //   console.log("means = " + means);
-        //   console.log("errors = " + errors);
-        
           //Update bars and errors bars
           for(let i = 0; i < amount_functions; i++){
             var child_rect_name = String('.rect-svg-' + i);
@@ -226,7 +209,8 @@ function sleep(ms) {
                     return yScale(d[1]);
                 });
           }
- 
+          
+          //Updating percentage of data loaded
           var percent = 100 * (t / n);
           changePercentage(percent);
 
