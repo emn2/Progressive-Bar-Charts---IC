@@ -108,15 +108,15 @@ function sleep(ms) {
     //         .attr('y',0)
     //         .attr('r',30);
 
-    // my_svg.selectAll('svg')
-    // .data(d3.range(amount_functions))
-    // .enter()
-    // .append('svg')
-    // .attr('x', function(d, i) {return xScale(id)})
-    // .attr('y', 0)
-    // .attr('width', xScale.bandwidth())
-    // .attr('height', h)
-    // .attr('id', function(d, i) { return String('child-svg-' + i)});
+    my_svg.selectAll('svg')
+    .data(d3.range(amount_functions))
+    .enter()
+    .append('svg')
+    .attr('x', function(d, i) {return xScale(id)})
+    .attr('y', 0)
+    .attr('width', xScale.bandwidth())
+    .attr('height', h)
+    .attr('id', function(d, i) { return String('child-svg-' + i)});
 
     debugger
 
@@ -181,8 +181,6 @@ function sleep(ms) {
           .attr("class", "axis")
           .attr("transform", "translate(" + padding + ",0)")
           .call(yAxis);
-
-    debugger
  
     async function updates(){
        // Updating charts every second
