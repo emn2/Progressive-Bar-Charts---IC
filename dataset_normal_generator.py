@@ -16,7 +16,7 @@ def generate():
     for i in range(100):
         mu = random.uniform(mu_left, mu_right)
         sigma = random.uniform(std_dev_left, std_dev_right)**(1/2)
-        datasequence = np.random.normal(mu, sigma, amount_of_points)
+        datasequence = np.random.normal(mu, sigma + 20, amount_of_points)
         dataset.append(datasequence)
 
     return dataset

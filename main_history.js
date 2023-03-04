@@ -23,7 +23,7 @@ function sleep(ms) {
  var dataset;
  var firstAnswered = false, secondAnswered = false;
  
- d3.json('Dataset_normal.json', function(data) {
+ d3.json('Dataset_normal_big_variance.json', function(data) {
     dataset = data;
     main_history();
  });
@@ -50,16 +50,16 @@ function sleep(ms) {
  
     for(let i = 0; i < amount_functions; i++){
         for(let j = 0; j < amount_history; j++){
-            means[i].push(dataset['means'][i][t]);
-            errors[i].push(dataset['confidence_intervals'][i][t]);
+            means[i].push(dataset['mean'][i][t]);
+            errors[i].push([dataset['ci_low'][i][t], dataset['ci_hi'][i][t]]);
         }
     }
 
     var maxi = 0;
-    for(let i in dataset['means']){
-       maxi = Math.max(maxi, d3.max(dataset['means'][i]));
-       maxi = Math.max(maxi, d3.max(dataset['confidence_intervals'][i][0]));
-       maxi = Math.max(maxi, d3.max(dataset['confidence_intervals'][i][1]));
+    for(let i in dataset['mean']){
+       maxi = Math.max(maxi, d3.max(dataset['mean'][i]));
+       maxi = Math.max(maxi, d3.max(dataset['ci_low'][i]));
+       maxi = Math.max(maxi, d3.max(dataset['ci_hi'][i]));
     }
  
     var xScale = d3.scaleBand()
@@ -169,17 +169,17 @@ function sleep(ms) {
  
     async function updates(){
        // Updating charts every second
-       var n = dataset['means'][0].length;
+       var n = dataset['mean'][0].length;
        while(t < n){
           t++;
 
           // Erasing first bar and adding a new bar at the end
           for(let i = 0; i < amount_functions; i++){
             means[i].shift();
-            means[i].push(dataset['means'][i][t]);
+            means[i].push(dataset['mean'][i][t]);
 
             errors[i].shift();
-            errors[i].push(dataset['confidence_intervals'][i][t]);
+            errors[i].push([dataset['ci_low'][i][t], dataset['ci_hi'][i][t]]);
           }
  
           await sleep(delayTime);

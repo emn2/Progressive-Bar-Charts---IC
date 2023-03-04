@@ -58,15 +58,15 @@ function main(){
    var errors = [];
 
    for(let i = 0; i < amount_functions; i++){
-      means.push(dataset['means'][i][t])
-      errors.push(dataset['confidence_intervals'][i][t])
+      means.push(dataset['mean'][i][t]);
+      errors.push([dataset['ci_low'][i][t], dataset['ci_hi'][i][t]]);
    }
 
    var maxi = 0;
-   for(let i in dataset['means']){
-      maxi = Math.max(maxi, d3.max(dataset['means'][i]));
-      maxi = Math.max(maxi, d3.max(dataset['confidence_intervals'][i][0]));
-      maxi = Math.max(maxi, d3.max(dataset['confidence_intervals'][i][1]));
+   for(let i in dataset['mean']){
+      maxi = Math.max(maxi, d3.max(dataset['mean'][i]));
+      maxi = Math.max(maxi, d3.max(dataset['ci_low'][i]));
+      maxi = Math.max(maxi, d3.max(dataset['ci_hi'][i]));
    }
 
    var xScale = d3.scaleBand()
@@ -152,13 +152,13 @@ function main(){
 
    async function updates(){
       // Updating charts every second
-      var n = dataset['means'][0].length;
+      var n = dataset['mean'][0].length;
       while(t < n){
          t++;
    
          for(let i = 0; i < amount_functions; i++){
-            means[i] = dataset['means'][i][t];
-            errors[i] = dataset['confidence_intervals'][i][t];
+            means[i] = dataset['mean'][i][t];
+            errors[i] = [dataset['ci_low'][i][t], dataset['ci_hi'][i][t]];
          }
 
          await sleep(delayTime);

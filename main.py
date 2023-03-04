@@ -2,7 +2,7 @@
 import scipy.stats as st
 import pandas as pd
 import numpy as np
-from dataset_power_generator import generate
+from dataset_normal_generator import generate
 
 def getConfidenceInterval(numElements, mean, std_dev, confidence):
    t_crit = st.norm.ppf(confidence)
@@ -16,14 +16,20 @@ def getStdDev(a, r):
 
 def calculate(datasequence):
     means = []
-    confidence_intervals = []
+    ci_hi = []
+    ci_low = []
 
     #first step 88 points
     idx = 88
     confidence = 0.95
 
     means.append(getMean(datasequence, idx))
-    confidence_intervals.append(getConfidenceInterval(idx, getMean(datasequence, idx), getStdDev(datasequence, idx), confidence))
+
+    [ci_l, ci_h] = getConfidenceInterval(idx, getMean(datasequence, idx), getStdDev(datasequence, idx), confidence)
+
+    ci_hi.append(ci_h)
+    ci_low.append(ci_l)
+
 
     offset = 84
     n = len(datasequence)
@@ -31,9 +37,12 @@ def calculate(datasequence):
         idx += offset
         mean = getMean(datasequence, idx)
         means.append(mean)
-        confidence_intervals.append(getConfidenceInterval(idx, mean, getStdDev(datasequence, idx), confidence))
 
-    return [means, confidence_intervals]
+        [ci_l, ci_h] = getConfidenceInterval(idx, mean, getStdDev(datasequence, idx), confidence)
+        ci_hi.append(ci_h)
+        ci_low.append(ci_l)
+
+    return [means, ci_low, ci_hi]
 
 
 #means for each datasequence and each moment analyzed
@@ -45,16 +54,14 @@ dataframe = generate()
 n = len(dataframe)
 
 dataset = []
-labels = ['datasequence', 'means', 'confidence_intervals']
+labels = ['datasequence', 'mean', 'ci_low', 'ci_hi']
 
 for i in range(n):
-    [m, ci] = calculate(dataframe[i])
-    dataset.append((dataframe[i], m, ci))
+    [m, ci_low, ci_hi] = calculate(dataframe[i])
+    dataset.append((dataframe[i], m, ci_low, ci_hi))
 
 dataset = pd.DataFrame(dataset, columns = labels)
 
-print(len(dataset['confidence_intervals'][0]))
-
-filename = "Dataset_power.json"
+filename = "Dataset_normal_big_variance.json"
 dataset.to_json(filename)
 
