@@ -62,6 +62,6 @@ for i in range(n):
 
 dataset = pd.DataFrame(dataset, columns = labels)
 
-filename = "Dataset_normal_big_variance.json"
+filename = "Dataset_normal_big_variance_3.json"
 dataset.to_json(filename)
 

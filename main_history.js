@@ -23,7 +23,7 @@ function sleep(ms) {
  var dataset;
  var firstAnswered = false, secondAnswered = false;
  
- d3.json('Dataset_normal_big_variance.json', function(data) {
+ d3.json('Dataset_normal_big_variance_3.json', function(data) {
     dataset = data;
     main_history();
  });
